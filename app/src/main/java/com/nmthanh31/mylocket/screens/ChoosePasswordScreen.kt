@@ -42,7 +42,7 @@ import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +107,8 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
                     focusedTextColor = Color.White,
                     cursorColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedTextColor = Color.White
                 ),
                 placeholder = {
                     Text(text = "Mật khẩu")
@@ -149,7 +150,8 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
             enabled = isTruePassword
         ) {
            Text(
-               text = "Tiếp tục"
+               text = "Tiếp tục",
+               fontWeight = FontWeight.Bold
            )
             Spacer(modifier = Modifier.width(8.dp))
 

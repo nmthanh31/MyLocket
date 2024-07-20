@@ -124,6 +124,7 @@ fun RegisterScreen(modifier: Modifier = Modifier){
                     cursorColor = Color.White, // Màu con trỏ
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedTextColor = Color.White
                 ),
                 placeholder = {
                     Text(text = "Địa chỉ email")
@@ -178,7 +179,8 @@ fun RegisterScreen(modifier: Modifier = Modifier){
             ) {
                 Text(
                     text = "Tiếp tục",
-                    color = if (isEmailValid) Color.Black else Color(0xFF4E4E50)
+                    color = if (isEmailValid) Color.Black else Color(0xFF4E4E50),
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
