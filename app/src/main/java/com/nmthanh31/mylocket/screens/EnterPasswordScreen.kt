@@ -43,129 +43,124 @@ import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoosePasswordScreen(modifier: Modifier = Modifier){
+fun EnterPasswordScreen(modifier: Modifier = Modifier) {
 
     var password by remember {
         mutableStateOf("")
     }
 
-    val isTruePassword = remember (password) {
-        password.length >= 8
+    val isPassword = remember(password) {
+        !password.isEmpty()
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Background),
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
             onClick = { /*TODO*/ },
             modifier = Modifier
                 .padding(start = 20.dp, top = 30.dp)
-                .size(50.dp)
-                .clip(CircleShape),
+                .clip(shape = CircleShape)
+                .size(50.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = Charcoal,
-                contentColor = Color.White
+                contentColor = Color.White,
+                containerColor = Charcoal
             )
-
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.back),
-                contentDescription = null
-            )
+            Icon(painter = painterResource(id = R.drawable.back), contentDescription = null)
         }
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Chọn một mật khẩu",
+                text = "Điền mật khẩu của bạn",
+                style = MaterialTheme.typography.headlineLarge,
                 color = Color.White,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
-
+                fontWeight = FontWeight.Bold
             )
 
             TextField(
                 value = password,
-                onValueChange = {input ->
-                    run {
-                        password = input
-                    }
-                },
+                onValueChange ={input -> run{
+                    password = input
+                }},
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp)
+                    .clip(shape = RoundedCornerShape(10.dp)),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Charcoal,
-                    focusedTextColor = Color.White,
                     cursorColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
                 ),
                 placeholder = {
                     Text(text = "Mật khẩu")
-                },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 30.dp, end = 30.dp, top = 15.dp, bottom = 15.dp)
-                    .clip(shape = RoundedCornerShape(10.dp))
-
+                }
             )
 
-            Row(
-
+            Button(
+                onClick = { /*TODO*/ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Charcoal,
+                    contentColor = Color.White
+                )
             ) {
                 Text(
-                    text = "Mật khẩu phải có ít nhất ",
-                    color = Color.White
-                )
-                Text(
-                    text = "8 ký tự",
-                    color = Amber
+                    text = "Bạn đã quên mật khẩu",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
 
         Button(
             onClick = { /*TODO*/ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Amber,
                 contentColor = Color.Black,
                 disabledContainerColor = Charcoal,
                 disabledContentColor = Color(0xFF4E4E50)
             ),
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, bottom = 30.dp),
-            enabled = isTruePassword
+            enabled = isPassword
         ) {
-           Text(
-               text = "Tiếp tục",
-               fontWeight = FontWeight.Bold
-           )
-            Spacer(modifier = Modifier.width(8.dp))
+            Row {
+                Text(
+                    text = "Tiếp tục",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                contentDescription = null,
-                tint = if (isTruePassword) Color.Black else Color(0xFF4E4E50)
-            )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                    contentDescription = null,
+
+                )
+            }
         }
     }
 }
 
 @Preview
 @Composable
-fun PreviewChoosePasswordScreen(){
-    ChoosePasswordScreen()
+fun PreviewPasswordScreen() {
+    EnterPasswordScreen()
 }

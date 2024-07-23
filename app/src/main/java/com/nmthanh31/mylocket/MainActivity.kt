@@ -36,14 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.nmthanh31.mylocket.screens.ChoosePasswordScreen
 import com.nmthanh31.mylocket.screens.ChooseUsernameScreen
-import com.nmthanh31.mylocket.screens.RegisterScreen
+import com.nmthanh31.mylocket.screens.RegisterAndLoginScreen
 import com.nmthanh31.mylocket.screens.WelcomeScreen
 import com.nmthanh31.mylocket.ui.theme.MyLocketTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         enableEdgeToEdge()
         setContent {
             MyLocketTheme {
@@ -51,7 +51,9 @@ class MainActivity : ComponentActivity() {
 //                    WelcomeScreen(modifier = Modifier.fillMaxSize())
 //                    RegisterScreen(modifier = Modifier.fillMaxSize().padding(paddingValues))
 //                    ChoosePasswordScreen(modifier = Modifier.fillMaxSize().padding(paddingValues))
-                    ChooseUsernameScreen(modifier = Modifier.fillMaxSize().padding(paddingValues))
+                    ChooseUsernameScreen(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues))
                 }
 
             }
