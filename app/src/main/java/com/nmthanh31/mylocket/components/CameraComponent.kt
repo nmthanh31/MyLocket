@@ -18,6 +18,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -32,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -40,7 +44,7 @@ import com.nmthanh31.mylocket.ui.theme.Amber
 
 
 @Composable
-fun CameraScreen(
+fun CameraComponent(
     modifier: Modifier = Modifier
 ){
     val context = LocalContext.current
@@ -89,14 +93,15 @@ fun CameraScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         AndroidView(
             factory = { previewView },
             modifier = Modifier
+                .fillMaxWidth()
                 .height(400.dp)
-                .clip(shape = RoundedCornerShape(70.dp))
-                .padding(10.dp),
+                .padding(10.dp)
+                .clip(shape = RoundedCornerShape(60.dp)),
         ) {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             cameraProviderFuture.addListener({
@@ -116,7 +121,7 @@ fun CameraScreen(
             }, ContextCompat.getMainExecutor(context))
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         Row(
             modifier = Modifier
@@ -137,17 +142,18 @@ fun CameraScreen(
                 Icon(painter = painterResource(id = R.drawable.flash), contentDescription = "Turn on flash", modifier = Modifier.size(60.dp))
             }
 
-            Button(
+
+            IconButton(
                 onClick = { /*TODO*/ },
                 modifier = Modifier
                     .size(80.dp)
                     .border(5.dp, Amber, CircleShape),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
                 )
             ) {
-
+                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Turn on flash", modifier = Modifier.size(60.dp))
             }
 
             IconButton(
@@ -162,6 +168,26 @@ fun CameraScreen(
             ) {
                 Icon(painter = painterResource(id = R.drawable.camera), contentDescription = "rotate camera", modifier = Modifier.size(60.dp))
             }
+        }
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Lịch sử",
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Icon(painter = painterResource(id = R.drawable.down), contentDescription = null, tint = Color.White)
         }
 
     }
