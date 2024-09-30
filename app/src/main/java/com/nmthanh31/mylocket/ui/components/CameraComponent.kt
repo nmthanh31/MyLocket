@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.components
+package com.nmthanh31.mylocket.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager

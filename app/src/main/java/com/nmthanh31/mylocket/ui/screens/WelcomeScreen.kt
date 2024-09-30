@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,10 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.*
 
@@ -30,18 +35,32 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Background),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.SpaceEvenly,
     ) {
+
+        Spacer(modifier = Modifier.size(50.dp))
+
         Image(
             painter = painterResource(id = R.drawable.welcome),
             contentDescription = null,
-            modifier = Modifier.size(400.dp)
+            modifier = Modifier.size(450.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        TitleComponent()
+        Spacer(modifier = Modifier.size(4.dp))
+        ActionComponent()
+        Spacer(modifier = Modifier.size(20.dp))
 
+    }
+}
+
+@Composable
+fun TitleComponent() {
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -57,9 +76,10 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             Text(
                 text = "Locket",
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.SansSerif,
+                color = MaterialTheme.colorScheme.secondary,
+                )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -82,9 +102,15 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
                 color = Color(0xFFB7B7B7),
             )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(40.dp))
-
+@Composable
+fun ActionComponent() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
         Button(
             onClick = { /*TODO*/ },
             colors = ButtonDefaults.buttonColors(
@@ -96,17 +122,21 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             Text(
                 text = "Tạo một tài khoản",
                 color = Color.Black,
-                style = MaterialTheme.typography.headlineSmall
-                )
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp
+            )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = "Đăng nhập",
             modifier = Modifier.clickable {  },
             color = Color.White,
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp
         )
     }
 }

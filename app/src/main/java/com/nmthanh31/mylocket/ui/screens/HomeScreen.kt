@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,8 +26,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.rememberCoroutineScope
-import com.nmthanh31.mylocket.components.CameraComponent
-import com.nmthanh31.mylocket.components.ImageComponent
+import com.nmthanh31.mylocket.ui.components.CameraComponent
+import com.nmthanh31.mylocket.ui.components.ImageComponent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

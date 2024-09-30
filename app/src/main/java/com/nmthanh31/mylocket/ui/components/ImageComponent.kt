@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.components
+package com.nmthanh31.mylocket.ui.components
 
 import android.net.Uri
 import androidx.compose.foundation.Image

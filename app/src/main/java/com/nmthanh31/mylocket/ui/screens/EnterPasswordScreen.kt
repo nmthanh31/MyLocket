@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

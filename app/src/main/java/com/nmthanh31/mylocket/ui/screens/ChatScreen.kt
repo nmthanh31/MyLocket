@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

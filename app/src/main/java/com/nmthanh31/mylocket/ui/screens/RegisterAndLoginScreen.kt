@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import android.util.Patterns
 import androidx.compose.foundation.background
@@ -48,19 +48,19 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween,
     ){
         IconButton(
             onClick = { /*TODO*/ },
             modifier = Modifier
-                .padding(start = 20.dp, top = 30.dp)
+                .padding(start = 20.dp, top = 100.dp)
                 .size(50.dp)
                 .clip(CircleShape),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = Charcoal,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.onTertiary,
+                contentColor = MaterialTheme.colorScheme.secondary
             )
         ) {
             Icon(
@@ -74,15 +74,15 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
 
         Column(
             modifier = Modifier
-                .background(Background),
+                .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = "Email của bạn là gì?",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif,
                 modifier = Modifier
                     .padding(start = 30.dp)
@@ -103,12 +103,12 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
                     .padding(start = 30.dp, end = 30.dp)
                     .clip(shape = RoundedCornerShape(10.dp)),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Charcoal,
-                    focusedTextColor = Color.White,
-                    cursorColor = Color.White, // Màu con trỏ
+                    containerColor = MaterialTheme.colorScheme.onTertiary,
+                    focusedTextColor = MaterialTheme.colorScheme.secondary,
+                    cursorColor = MaterialTheme.colorScheme.tertiary, // Màu con trỏ
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = MaterialTheme.colorScheme.secondary
                 ),
                 placeholder = {
                     Text(text = "Địa chỉ email")
@@ -157,8 +157,10 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(50.dp)
                     .padding(start = 10.dp, end = 10.dp),
-                enabled = isEmailValid
+                enabled = isEmailValid,
+
 
             ) {
                 Text(
