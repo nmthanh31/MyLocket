@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import android.util.Patterns
 import androidx.compose.foundation.background
@@ -33,34 +33,40 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
+fun RegisterAndLoginScreen(
+    navController: NavController,
+    registerOrLogin : String?,
+){
     var email by remember {
         mutableStateOf("")
     }
 
     val isEmailValid = remember(email) { Patterns.EMAIL_ADDRESS.matcher(email).matches() }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween,
     ){
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier
-                .padding(start = 20.dp, top = 30.dp)
+                .padding(start = 20.dp, top = 100.dp)
                 .size(50.dp)
                 .clip(CircleShape),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = Charcoal,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.onTertiary,
+                contentColor = MaterialTheme.colorScheme.secondary
             )
         ) {
             Icon(
@@ -74,15 +80,15 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
 
         Column(
             modifier = Modifier
-                .background(Background),
+                .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = "Email của bạn là gì?",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif,
                 modifier = Modifier
                     .padding(start = 30.dp)
@@ -103,12 +109,12 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
                     .padding(start = 30.dp, end = 30.dp)
                     .clip(shape = RoundedCornerShape(10.dp)),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Charcoal,
-                    focusedTextColor = Color.White,
-                    cursorColor = Color.White, // Màu con trỏ
+                    containerColor = MaterialTheme.colorScheme.onTertiary,
+                    focusedTextColor = MaterialTheme.colorScheme.secondary,
+                    cursorColor = MaterialTheme.colorScheme.tertiary, // Màu con trỏ
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = MaterialTheme.colorScheme.secondary
                 ),
                 placeholder = {
                     Text(text = "Địa chỉ email")
@@ -149,7 +155,13 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    if (registerOrLogin == "register"){
+                        navController.navigate("choosePassword/{$email}")
+                    }else if (registerOrLogin == "login"){
+                        navController.navigate("enterPassword/{$email}")
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = if (isEmailValid) Amber else Color(0xFF1F1F21),
                     containerColor = if (isEmailValid) Amber else Color(0xFF1F1F21),
@@ -157,8 +169,10 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(50.dp)
                     .padding(start = 10.dp, end = 10.dp),
-                enabled = isEmailValid
+                enabled = isEmailValid,
+
 
             ) {
                 Text(
@@ -180,8 +194,4 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
     }
 }
 
-@Preview
-@Composable
-fun PreviewRegisterScreen(){
-    RegisterAndLoginScreen()
-}
+

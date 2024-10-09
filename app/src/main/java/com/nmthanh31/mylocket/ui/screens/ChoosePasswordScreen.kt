@@ -1,5 +1,8 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
+import android.content.ContentValues.TAG
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,11 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Button
@@ -21,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -33,20 +39,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
+import kotlin.coroutines.coroutineContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoosePasswordScreen(modifier: Modifier = Modifier){
+fun ChoosePasswordScreen(
+    auth: FirebaseAuth,
+    navController: NavController,
+    email: String?
+){
 
     var password by remember {
         mutableStateOf("")
@@ -56,6 +73,12 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         password.length >= 8
     }
 
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val emailFix = email?.substring(1,email.length-1)
+
+    var context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,14 +86,14 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier
-                .padding(start = 20.dp, top = 30.dp)
+                .padding(start = 20.dp, top = 100.dp)
                 .size(50.dp)
                 .clip(CircleShape),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = Charcoal,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.onTertiary,
+                contentColor = MaterialTheme.colorScheme.secondary
             )
 
         ) {
@@ -88,14 +111,14 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         ) {
             Text(
                 text = "Chọn một mật khẩu",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.SansSerif,
 
             )
 
-            TextField(
+            OutlinedTextField(
                 value = password,
                 onValueChange = {input ->
                     run {
@@ -103,12 +126,12 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
                     }
                 },
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Charcoal,
-                    focusedTextColor = Color.White,
-                    cursorColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.onTertiary,
+                    focusedTextColor = MaterialTheme.colorScheme.secondary,
+                    cursorColor = MaterialTheme.colorScheme.secondary,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = MaterialTheme.colorScheme.secondary
                 ),
                 placeholder = {
                     Text(text = "Mật khẩu")
@@ -117,7 +140,15 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 30.dp, end = 30.dp, top = 15.dp, bottom = 15.dp)
-                    .clip(shape = RoundedCornerShape(10.dp))
+                    .clip(shape = RoundedCornerShape(10.dp)),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(painter = if (passwordVisible) painterResource(id = R.drawable.ic_visibility_off) else painterResource(id = R.drawable.ic_visibility), contentDescription = "")
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 
             )
 
@@ -126,7 +157,7 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
             ) {
                 Text(
                     text = "Mật khẩu phải có ít nhất ",
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 Text(
                     text = "8 ký tự",
@@ -136,16 +167,40 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         }
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+
+                if (emailFix != null) {
+                    auth.createUserWithEmailAndPassword(emailFix, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+//                                Log.d(TAG, "createUserWithEmail:success")
+//                                navController.navigate("chooseUserName/${email}/${password}")
+                                navController.navigate("chooseName")
+                            } else {
+                                Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                                Toast.makeText(
+                                    context,
+                                    email,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        }
+                }
+
+
+
+
+            },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Amber,
+                containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = Color.Black,
-                disabledContainerColor = Charcoal,
+                disabledContainerColor = MaterialTheme.colorScheme.onTertiary,
                 disabledContentColor = Color(0xFF4E4E50)
             ),
 
             modifier = Modifier
                 .fillMaxWidth()
+                .height(90.dp)
                 .padding(start = 20.dp, end = 20.dp, bottom = 30.dp),
             enabled = isTruePassword
         ) {
@@ -164,8 +219,8 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
     }
 }
 
-@Preview
-@Composable
-fun PreviewChoosePasswordScreen(){
-    ChoosePasswordScreen()
-}
+//@Preview
+//@Composable
+//fun PreviewChoosePasswordScreen(){
+//    ChoosePasswordScreen(email = "", navController = NavController)
+//}

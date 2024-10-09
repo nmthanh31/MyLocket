@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.components
+package com.nmthanh31.mylocket.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -6,15 +6,22 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -44,39 +51,46 @@ import com.nmthanh31.mylocket.ui.theme.Amber
 
 
 @Composable
-fun CameraComponent(
-    modifier: Modifier = Modifier
-){
+fun CameraComponent() {
+
+    // Lấy context hiện tại của composable, thường cần để truy cập các dịch vụ hoặc tài nguyên hệ thống.
     val context = LocalContext.current
+
+    // Lấy LifecycleOwner được liên kết với composable hiện tại. Điều này được sử dụng để quản lý vòng đời của camera
     val localLifecycleOwner = LocalLifecycleOwner.current
 
+
+    // Tạo một composable PreviewView, được sử dụng để hiển thị bản xem trước camera.
+    // remember là một hàm composable đảm bảo rằng instance PreviewView chỉ được tạo một lần và được sử dụng lại trong các lần recomposition tiếp theo
     val previewView = remember {
         PreviewView(context)
     }
 
+    // Mảng này chứa các quyền cần thiết cho chức năng camera (camera, ghi âm và lưu trữ).
     val CAMERA_PERMISSIONS = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
-    val hasRequestMultiplePermissions = CAMERA_PERMISSIONS.all {
+    CAMERA_PERMISSIONS.all {
+        // kiểm tra xem tất cả các quyền đã được cấp hay chưa bằng cách sử dụng ContextCompat.checkSelfPermission
         ContextCompat.checkSelfPermission(
             context,
             it
         ) == PackageManager.PERMISSION_GRANTED
     }
-
+    //Đây là một hàm composable khởi chạy một activity để yêu cầu các quyền được chỉ định.
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        // Handle the permissions result
         val allGranted = permissions.values.all { it }
         if (allGranted) {
             Toast.makeText(context, "Permissions granted", Toast.LENGTH_SHORT).show()
         } else {
-            // Permissions denied
             Toast.makeText(context, "Permissions denied", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // một biến trạng thái cho biết liệu tất cả các quyền đã được cấp hay chưa.
 
     val hasAllPermissions by remember {
         derivedStateOf {
@@ -86,21 +100,36 @@ fun CameraComponent(
         }
     }
 
+    // Hàm composable này được sử dụng để khởi chạy một coroutine. Trong trường hợp này, nó kiểm tra xem các quyền đã được cấp chưa và yêu cầu chúng nếu cần
     LaunchedEffect(hasAllPermissions) {
         if (!hasAllPermissions) {
             permissionLauncher.launch(CAMERA_PERMISSIONS)
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
+    // Một biến trạng thái cho biết có đang bật flash không?
+    var isFlashing by remember {
+        mutableStateOf(false)
+    }
+
+    // Một biến trạng thái cho biết có đang chụp không?
+    var isCapturing by remember {
+        mutableStateOf(false)
+    }
+
+    var isFrontOrBack by remember {
+        mutableStateOf(true)
+    }
+
+    Column{
+        
+        Spacer(modifier = Modifier.height(150.dp))
+        
         AndroidView(
             factory = { previewView },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp)
-                .padding(10.dp)
+                .height(450.dp)
                 .clip(shape = RoundedCornerShape(60.dp)),
         ) {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -112,7 +141,7 @@ fun CameraComponent(
                     setSurfaceProvider(previewView.surfaceProvider)
                 }
 
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                val cameraSelector = if (isFrontOrBack == true) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
 
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -125,14 +154,17 @@ fun CameraComponent(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .height(130.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+
+                },
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(50.dp)
                     .clip(shape = CircleShape),
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
@@ -146,20 +178,22 @@ fun CameraComponent(
             IconButton(
                 onClick = { /*TODO*/ },
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(110.dp)
                     .border(5.dp, Amber, CircleShape),
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
                     contentColor = Color.White
                 )
             ) {
-                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Turn on flash", modifier = Modifier.size(60.dp))
+                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Turn on flash", modifier = Modifier.size(90.dp))
             }
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    !isFrontOrBack
+                },
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(50.dp)
                     .clip(shape = CircleShape),
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
@@ -170,7 +204,7 @@ fun CameraComponent(
             }
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(70.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -191,5 +225,11 @@ fun CameraComponent(
         }
 
     }
+
+}
+
+fun captureImage(isFlashEnabled: Boolean, isFrontOrBack: Boolean){
+    val cameraSelector =  if (isFrontOrBack == true) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+    val imageCapture = ImageCapture.Builder().setFlashMode(if (isFlashEnabled) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF).build()
 
 }

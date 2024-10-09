@@ -1,4 +1,4 @@
-package com.nmthanh31.mylocket.screens
+package com.nmthanh31.mylocket.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,32 +25,65 @@ import com.nmthanh31.mylocket.ui.theme.Charcoal
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.nmthanh31.mylocket.components.CameraComponent
-import com.nmthanh31.mylocket.components.ImageComponent
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.nmthanh31.mylocket.ui.components.CameraComponent
+import com.nmthanh31.mylocket.ui.components.ImageComponent
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    navController: NavController,
+    auth: FirebaseAuth
+) {
     val pagerState =  rememberPagerState (initialPage = 0, pageCount = {10})
     val coroutineScope  = rememberCoroutineScope()
 
-    Column(
+    //bottom sheet
+    var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Background),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+            .fillMaxSize(),
     ) {
+        VerticalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) {page ->
+            when (page){
+                0 -> CameraComponent()
+                else -> ImageComponent()
+            }
+
+        }
+
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 50.dp),
+                .padding(start = 20.dp, end = 20.dp, top = 75.dp)
+                .background(Color.Transparent),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    showBottomSheet = true
+                },
                 modifier = Modifier
                     .size(50.dp)
                     .clip(shape = CircleShape),
@@ -62,12 +95,12 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 Icon(
                     painter = painterResource(id = R.drawable.user),
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {  },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Charcoal,
                     contentColor = Color.White
@@ -85,12 +118,12 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                     text = "1 Bạn bè",
                     style = MaterialTheme.typography.bodyLarge,
                     fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate("chat") },
                 modifier = Modifier
                     .size(50.dp)
                     .clip(shape = CircleShape),
@@ -106,27 +139,18 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxSize(),
+                sheetState = sheetState,
+                onDismissRequest = { showBottomSheet = false },
+                containerColor = MaterialTheme.colorScheme.onBackground
 
-//        Spacer(modifier = Modifier.height(50.dp))
-        
-//        CameraComponent()
-
-        VerticalPager(
-            state = pagerState,
-            modifier = modifier.fillMaxWidth(),
-        ) {page ->
-            when (page){
-                0 -> CameraComponent()
-                else -> ImageComponent()
+            ) {
+                ProfileScreen(auth, navController)
             }
-
         }
-
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
-@Composable
-fun PreviewHomeScreen() {
-    HomeScreen()
-}
+

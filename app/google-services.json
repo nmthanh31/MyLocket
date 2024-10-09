@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "888381000230",
+    "project_id": "mylocket-8fb34",
+    "storage_bucket": "mylocket-8fb34.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888381000230:android:bef797e078eed87647f4e7",
+        "android_client_info": {
+          "package_name": "com.nmthanh31.mylocket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-9v7y9waYoED-dYmWz6VJ4wVvu_nHJM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
