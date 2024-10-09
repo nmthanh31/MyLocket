@@ -33,17 +33,23 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
+fun RegisterAndLoginScreen(
+    navController: NavController,
+    registerOrLogin : String?,
+){
     var email by remember {
         mutableStateOf("")
     }
 
     val isEmailValid = remember(email) { Patterns.EMAIL_ADDRESS.matcher(email).matches() }
+
+
 
     Column(
         modifier = Modifier
@@ -53,7 +59,7 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
         verticalArrangement = Arrangement.SpaceBetween,
     ){
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier
                 .padding(start = 20.dp, top = 100.dp)
                 .size(50.dp)
@@ -149,7 +155,13 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    if (registerOrLogin == "register"){
+                        navController.navigate("choosePassword/{$email}")
+                    }else if (registerOrLogin == "login"){
+                        navController.navigate("enterPassword/{$email}")
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = if (isEmailValid) Amber else Color(0xFF1F1F21),
                     containerColor = if (isEmailValid) Amber else Color(0xFF1F1F21),
@@ -182,8 +194,4 @@ fun RegisterAndLoginScreen(modifier: Modifier = Modifier){
     }
 }
 
-@Preview
-@Composable
-fun PreviewRegisterScreen(){
-    RegisterAndLoginScreen()
-}
+

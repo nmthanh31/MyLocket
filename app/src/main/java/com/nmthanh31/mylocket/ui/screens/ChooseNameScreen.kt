@@ -1,5 +1,6 @@
 package com.nmthanh31.mylocket.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,17 +26,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChooseNameScreen(modifier: Modifier = Modifier){
+fun ChooseNameScreen(
+    navController: NavController,
+    auth: FirebaseAuth
+){
 
     var lastname by remember {
         mutableStateOf("")
@@ -46,6 +54,9 @@ fun ChooseNameScreen(modifier: Modifier = Modifier){
     }
 
     val isTrueName = remember(lastname, firstname) { lastname.isNotEmpty() && firstname.isNotEmpty() }
+
+    val currentUser = auth.currentUser
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -121,7 +132,18 @@ fun ChooseNameScreen(modifier: Modifier = Modifier){
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 30.dp, end = 30.dp, bottom = 30.dp),
-            onClick = { /*TODO*/ },
+            onClick = {
+                currentUser?.updateProfile(UserProfileChangeRequest.Builder()
+                    .setDisplayName(firstname+" "+ lastname)
+                    .build())
+                    ?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            navController.navigate("home")
+                        } else {
+                            Toast.makeText(context, "Thêm tên người dùng thất bại", Toast.LENGTH_SHORT)
+                        }
+                    }
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Amber,
                 contentColor = Color.Black,
@@ -136,10 +158,4 @@ fun ChooseNameScreen(modifier: Modifier = Modifier){
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun PreviewChooseName(){
-    ChooseNameScreen()
 }

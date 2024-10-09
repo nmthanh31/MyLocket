@@ -1,5 +1,9 @@
 package com.nmthanh31.mylocket.ui.screens
 
+import android.content.ContentValues.TAG
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,11 +11,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Button
@@ -21,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -33,11 +40,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
@@ -45,7 +58,11 @@ import com.nmthanh31.mylocket.ui.theme.Charcoal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnterPasswordScreen(modifier: Modifier = Modifier) {
+fun EnterPasswordScreen(
+    auth: FirebaseAuth,
+    navController: NavController,
+    email: String?
+) {
 
     var password by remember {
         mutableStateOf("")
@@ -55,15 +72,22 @@ fun EnterPasswordScreen(modifier: Modifier = Modifier) {
         !password.isEmpty()
     }
 
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val fixedEmail = email?.substring(1, email.length-1)
+
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background),
+            .background(Background)
+            .padding(top = 20.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier
                 .padding(start = 20.dp, top = 30.dp)
                 .clip(shape = CircleShape)
@@ -89,11 +113,13 @@ fun EnterPasswordScreen(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Bold
             )
 
-            TextField(
+            OutlinedTextField(
                 value = password,
-                onValueChange ={input -> run{
-                    password = input
-                }},
+                onValueChange = { input ->
+                    run {
+                        password = input
+                    }
+                },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,11 +135,41 @@ fun EnterPasswordScreen(modifier: Modifier = Modifier) {
                 ),
                 placeholder = {
                     Text(text = "Mật khẩu")
-                }
+                },
+                trailingIcon = {
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            painter = if (passwordVisible) painterResource(id = R.drawable.ic_visibility_off) else painterResource(
+                                id = R.drawable.ic_visibility
+                            ), contentDescription = ""
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             )
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    if (fixedEmail != null) {
+                        auth.sendPasswordResetEmail(email)
+                            .addOnCompleteListener{
+                                    task ->
+                                run {
+                                    if (task.isComplete) {
+                                        Toast.makeText(
+                                            context,
+                                          "Đã gửi đường dẫn đổi mật khẩu vào email",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(context, "Không thể gửi đến email", Toast.LENGTH_SHORT)
+                                    }
+                                }
+                            }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Charcoal,
                     contentColor = Color.White
@@ -128,18 +184,24 @@ fun EnterPasswordScreen(modifier: Modifier = Modifier) {
         }
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                if (fixedEmail != null) {
+                    SignIn(auth, navController, password, fixedEmail, context )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, bottom = 10.dp),
+                .padding(start = 20.dp, end = 20.dp, bottom = 10.dp)
+                .height(60.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Amber,
                 contentColor = Color.Black,
                 disabledContainerColor = Charcoal,
                 disabledContentColor = Color(0xFF4E4E50)
             ),
-            enabled = isPassword
-        ) {
+            enabled = isPassword,
+
+            ) {
             Row {
                 Text(
                     text = "Tiếp tục",
@@ -153,14 +215,35 @@ fun EnterPasswordScreen(modifier: Modifier = Modifier) {
                     imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                     contentDescription = null,
 
-                )
+                    )
             }
         }
+
     }
 }
 
-@Preview
-@Composable
-fun PreviewPasswordScreen() {
-    EnterPasswordScreen()
+fun SignIn(
+    auth: FirebaseAuth,
+    navController: NavController,
+    password: String,
+    email: String,
+    context: Context
+) {
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener{ task ->
+            run {
+                if (task.isComplete) {
+                    navController.navigate("home")
+                } else {
+                    Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        context,
+                        email,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
 }
+
+

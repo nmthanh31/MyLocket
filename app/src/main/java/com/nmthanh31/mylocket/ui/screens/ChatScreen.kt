@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
@@ -40,7 +41,9 @@ import com.nmthanh31.mylocket.ui.theme.Charcoal
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(modifier: Modifier = Modifier) {
+fun ChatScreen(
+    navController: NavController
+) {
 //    var listFriend = listOf("A", "B", "C")
 
     var listFriend = listOf<String>()
@@ -65,7 +68,7 @@ fun ChatScreen(modifier: Modifier = Modifier) {
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { /*TODO*/ }
+                        onClick = { navController.popBackStack() }
                     ) {
                         Icon(painter = painterResource(id = R.drawable.back) , contentDescription = null)
                     }
@@ -125,10 +128,4 @@ fun ChatScreen(modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-@Preview
-@Composable
-private fun PreviewChatScreen() {
-    ChatScreen()
 }

@@ -31,9 +31,12 @@ import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.*
 
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen(
+    onNavigateToRegister: () -> Unit,
+    onNavigateToLogin: () -> Unit
+) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -50,7 +53,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
 
         TitleComponent()
         Spacer(modifier = Modifier.size(4.dp))
-        ActionComponent()
+        ActionComponent(onNavigateToRegister, onNavigateToLogin)
         Spacer(modifier = Modifier.size(20.dp))
 
     }
@@ -106,13 +109,16 @@ fun TitleComponent() {
 }
 
 @Composable
-fun ActionComponent() {
+fun ActionComponent(
+    onNavigateToRegister: () -> Unit,
+    onNavigateToLogin: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ){
         Button(
-            onClick = { /*TODO*/ },
+            onClick = { onNavigateToRegister() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Amber,
                 contentColor = Amber
@@ -132,7 +138,7 @@ fun ActionComponent() {
 
         Text(
             text = "Đăng nhập",
-            modifier = Modifier.clickable {  },
+            modifier = Modifier.clickable { onNavigateToLogin() },
             color = Color.White,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,

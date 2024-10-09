@@ -1,5 +1,8 @@
 package com.nmthanh31.mylocket.ui.screens
 
+import android.content.ContentValues.TAG
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,15 +48,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
+import kotlin.coroutines.coroutineContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoosePasswordScreen(modifier: Modifier = Modifier){
+fun ChoosePasswordScreen(
+    auth: FirebaseAuth,
+    navController: NavController,
+    email: String?
+){
 
     var password by remember {
         mutableStateOf("")
@@ -64,6 +75,10 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
 
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val emailFix = email?.substring(1,email.length-1)
+
+    var context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +86,7 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.popBackStack() },
             modifier = Modifier
                 .padding(start = 20.dp, top = 100.dp)
                 .size(50.dp)
@@ -152,7 +167,30 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
         }
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+
+                if (emailFix != null) {
+                    auth.createUserWithEmailAndPassword(emailFix, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+//                                Log.d(TAG, "createUserWithEmail:success")
+//                                navController.navigate("chooseUserName/${email}/${password}")
+                                navController.navigate("chooseName")
+                            } else {
+                                Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                                Toast.makeText(
+                                    context,
+                                    email,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        }
+                }
+
+
+
+
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = Color.Black,
@@ -181,8 +219,8 @@ fun ChoosePasswordScreen(modifier: Modifier = Modifier){
     }
 }
 
-@Preview
-@Composable
-fun PreviewChoosePasswordScreen(){
-    ChoosePasswordScreen()
-}
+//@Preview
+//@Composable
+//fun PreviewChoosePasswordScreen(){
+//    ChoosePasswordScreen(email = "", navController = NavController)
+//}

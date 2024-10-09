@@ -1,5 +1,6 @@
 package com.nmthanh31.mylocket.ui.screens
 
+import android.provider.ContactsContract.CommonDataKinds.Email
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
@@ -45,7 +48,10 @@ import com.nmthanh31.mylocket.ui.theme.Charcoal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChooseUsernameScreen(modifier: Modifier = Modifier) {
+fun  ChooseUsernameScreen(
+    navController: NavController,
+    auth: FirebaseAuth
+) {
 
     val usernameList = listOf("user1", "user2", "user3", "user4")
 
@@ -63,6 +69,9 @@ fun ChooseUsernameScreen(modifier: Modifier = Modifier) {
         username.isNotEmpty() && username[0].isDigit() -> "  Phải bắt đầu bằng một chữ"
         else -> "" // Trả về chuỗi rỗng nếu không có điều kiện nào thỏa mãn
     }
+
+    var currentUser = auth.currentUser
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -179,7 +188,10 @@ fun ChooseUsernameScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 30.dp, end = 30.dp, bottom = 30.dp),
-            onClick = { /*TODO*/ },
+            onClick = {
+//                currentUser?.
+////                navController.navigate("chooseName/{$email}/{$password}/{$username}")
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Amber,
                 contentColor = Color.Black,
@@ -196,8 +208,3 @@ fun ChooseUsernameScreen(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview
-@Composable
-fun PreviewChooseUsernameScreen(){
-    ChooseUsernameScreen()
-}
