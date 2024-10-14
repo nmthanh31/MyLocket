@@ -1,6 +1,7 @@
-package com.nmthanh31.mylocket.ui.screens
+package com.nmthanh31.mylocket.ui.bottomsheets
 
-import android.icu.text.CaseMap.Title
+import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -16,43 +17,68 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
+fun ProfileBottomSheet(
     auth: FirebaseAuth,
-    navController: NavController
+    navController: NavController,
 ) {
 
-    val currentUser = auth.currentUser
 
-    var name = currentUser?.displayName
+    var currentUser by remember { mutableStateOf(auth.currentUser) }
 
+
+    var showBottomSheetChangeName by remember {
+        mutableStateOf(false)
+    }
+
+    val sheetStateChangeName = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    var showBottomSheetChangeEmail by remember {
+        mutableStateOf(false)
+    }
+
+    val sheetStateChangeEmail = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    val email = currentUser?.email
 
 
     Column(
@@ -81,7 +107,7 @@ fun ProfileScreen(
                 ),
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {  },
                     modifier = Modifier
                         .size(120.dp)
                         .clip(shape = CircleShape)
@@ -106,18 +132,50 @@ fun ProfileScreen(
 
 
 
-        if (name != null) {
-            InformationLine(name)
+        if (currentUser?.displayName != null) {
+            InformationLine(currentUser!!.displayName!!, onShare = {}, onChangeName = {
+                showBottomSheetChangeName = !showBottomSheetChangeName
+            })
         }
 
-        ButtonSetting(auth, navController)
+        ButtonSetting(
+            auth,
+            navController,
+            onOpenBottomSheet={
+                showBottomSheetChangeEmail = !showBottomSheetChangeEmail
+            }
+        )
 
+        if (showBottomSheetChangeName) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxSize(),
+                sheetState = sheetStateChangeName,
+                onDismissRequest = { showBottomSheetChangeName = false },
+                containerColor = MaterialTheme.colorScheme.onBackground
+
+            ) {
+                ChangeNameBottomSheet(auth,sheetStateChangeName, onSheetClosed = {showBottomSheetChangeName = false})
+            }
+        }
+        if (showBottomSheetChangeEmail) {
+            ModalBottomSheet(
+                modifier = Modifier.fillMaxSize(),
+                sheetState = sheetStateChangeEmail,
+                onDismissRequest = { showBottomSheetChangeEmail = false },
+                containerColor = MaterialTheme.colorScheme.onBackground
+
+            ) {
+                ChangeEmailBottomSheet(auth, email)
+            }
+        }
     }
 }
 
 @Composable
 fun InformationLine(
     name: String,
+    onShare: () -> Unit,
+    onChangeName: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -147,7 +205,7 @@ fun InformationLine(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onShare() },
                 modifier = Modifier
                     .border(
                         width = 5.dp,
@@ -171,7 +229,7 @@ fun InformationLine(
             Spacer(modifier = Modifier.width(10.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { onChangeName() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.onSecondary,
                     contentColor = MaterialTheme.colorScheme.secondary
@@ -187,13 +245,16 @@ fun InformationLine(
             }
         }
     }
+
+
 }
 
 
 @Composable
 fun ButtonSetting(
     auth: FirebaseAuth,
-    navController: NavController
+    navController: NavController,
+    onOpenBottomSheet: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -230,7 +291,9 @@ fun ButtonSetting(
             title = "Thay đổi địa chỉ Email",
             icon = R.drawable.ic_email,
             status = "start",
-            onAction = {})
+            onAction = {
+                onOpenBottomSheet()
+            })
         ButtonCustom(title = "Đăng xuất", icon = R.drawable.ic_log_out, status = "", onAction = {
             auth.signOut()
             navController.navigate("welcome")
@@ -239,7 +302,20 @@ fun ButtonSetting(
             title = "Xóa tài khoản",
             icon = R.drawable.ic_delele,
             status = "end",
-            onAction = {})
+            onAction = {
+                val user = auth.currentUser!!
+
+                user.delete()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d(TAG, "User account deleted.")
+                            navController.navigate("welcome")
+                        }
+                    }
+            }
+        )
+
+
     }
 }
 

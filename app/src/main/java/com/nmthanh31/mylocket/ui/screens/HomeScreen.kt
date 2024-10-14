@@ -20,9 +20,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nmthanh31.mylocket.R
-import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Charcoal
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,10 +29,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.nmthanh31.mylocket.ui.bottomsheets.ProfileBottomSheet
 import com.nmthanh31.mylocket.ui.components.CameraComponent
 import com.nmthanh31.mylocket.ui.components.ImageComponent
 
@@ -45,7 +43,6 @@ fun HomeScreen(
     auth: FirebaseAuth
 ) {
     val pagerState =  rememberPagerState (initialPage = 0, pageCount = {10})
-    val coroutineScope  = rememberCoroutineScope()
 
     //bottom sheet
     var showBottomSheet by remember {
@@ -147,7 +144,7 @@ fun HomeScreen(
                 containerColor = MaterialTheme.colorScheme.onBackground
 
             ) {
-                ProfileScreen(auth, navController)
+                ProfileBottomSheet(auth, navController)
             }
         }
     }

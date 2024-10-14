@@ -2,7 +2,6 @@ package com.nmthanh31.mylocket.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,10 +11,8 @@ import com.google.firebase.auth.auth
 import com.nmthanh31.mylocket.ui.screens.ChatScreen
 import com.nmthanh31.mylocket.ui.screens.ChooseNameScreen
 import com.nmthanh31.mylocket.ui.screens.ChoosePasswordScreen
-import com.nmthanh31.mylocket.ui.screens.ChooseUsernameScreen
 import com.nmthanh31.mylocket.ui.screens.EnterPasswordScreen
 import com.nmthanh31.mylocket.ui.screens.HomeScreen
-import com.nmthanh31.mylocket.ui.screens.ProfileScreen
 import com.nmthanh31.mylocket.ui.screens.RegisterAndLoginScreen
 import com.nmthanh31.mylocket.ui.screens.WelcomeScreen
 
@@ -64,13 +61,7 @@ fun MyLocketNavHost() {
                 auth = auth
             )
         }
-        composable("chooseUserName/{email}/{password}") {
 
-            ChooseUsernameScreen(
-                navController = navController,
-                auth = auth
-            )
-        }
         composable("choosePassword/{email}") { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email")
             ChoosePasswordScreen(
