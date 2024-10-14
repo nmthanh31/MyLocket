@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -293,11 +294,19 @@ fun ButtonSetting(
             status = "start",
             onAction = {
                 onOpenBottomSheet()
-            })
-        ButtonCustom(title = "Đăng xuất", icon = R.drawable.ic_log_out, status = "", onAction = {
+            },
+            contentColor = MaterialTheme.colorScheme.secondary
+        )
+        ButtonCustom(
+            title = "Đăng xuất",
+            icon = R.drawable.ic_log_out,
+            status = "",
+            onAction = {
             auth.signOut()
             navController.navigate("welcome")
-        })
+            },
+            contentColor = MaterialTheme.colorScheme.secondary
+        )
         ButtonCustom(
             title = "Xóa tài khoản",
             icon = R.drawable.ic_delele,
@@ -312,7 +321,8 @@ fun ButtonSetting(
                             navController.navigate("welcome")
                         }
                     }
-            }
+            },
+            contentColor = Color.Red
         )
 
 
@@ -324,7 +334,8 @@ fun ButtonCustom(
     title: String,
     icon: Int,
     status: String,
-    onAction: () -> Unit
+    onAction: () -> Unit,
+    contentColor: Color
 ) {
 
     var topStart: Dp = 0.dp
@@ -347,7 +358,7 @@ fun ButtonCustom(
             .height(65.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.onSecondary,
-            contentColor = MaterialTheme.colorScheme.secondary
+            contentColor = contentColor
         ),
         shape = RoundedCornerShape(
             topStart = topStart,
