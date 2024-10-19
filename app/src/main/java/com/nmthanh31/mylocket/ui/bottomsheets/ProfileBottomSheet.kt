@@ -57,6 +57,8 @@ import kotlinx.coroutines.launch
 fun ProfileBottomSheet(
     auth: FirebaseAuth,
     navController: NavController,
+    onClosed: () -> Unit,
+    sheetState: SheetState
 ) {
 
 
@@ -144,7 +146,9 @@ fun ProfileBottomSheet(
             navController,
             onOpenBottomSheet={
                 showBottomSheetChangeEmail = !showBottomSheetChangeEmail
-            }
+            },
+            onClosed = onClosed,
+            sheetState = sheetState
         )
 
         if (showBottomSheetChangeName) {
@@ -251,12 +255,16 @@ fun InformationLine(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ButtonSetting(
     auth: FirebaseAuth,
     navController: NavController,
-    onOpenBottomSheet: () -> Unit
+    onOpenBottomSheet: () -> Unit,
+    onClosed:()->Unit,
+    sheetState: SheetState
 ) {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -303,7 +311,12 @@ fun ButtonSetting(
             status = "",
             onAction = {
             auth.signOut()
-            navController.navigate("welcome")
+//            navController.navigate("welcome")
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        onClosed()
+                    }
+                }
             },
             contentColor = MaterialTheme.colorScheme.secondary
         )

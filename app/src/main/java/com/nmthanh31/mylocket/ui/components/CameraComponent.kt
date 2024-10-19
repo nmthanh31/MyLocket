@@ -2,8 +2,10 @@ package com.nmthanh31.mylocket.ui.components
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Environment
 import android.util.Log
 import android.util.Size
+import android.view.Surface
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -53,18 +56,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.Amber
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.OutputStream
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraComponent() {
+fun CameraComponent(
+    navController: NavController
+) {
 
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val previewView: PreviewView = remember { PreviewView(context) }
     val isFlashing = remember {
@@ -76,23 +89,47 @@ fun CameraComponent() {
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
         )
     )
 
-//    //cấp quyền khi thực thi composable
+    //cấp quyền khi thực thi composable
     LaunchedEffect(Unit) {
         permissionState.launchMultiplePermissionRequest()
     }
 
 
+    //CameraX
     val cameraSelector = remember {
         mutableStateOf(CameraSelector.DEFAULT_FRONT_CAMERA)
     }
 
-    val preview = Preview.Builder().setMaxResolution(Size(450, 450)).setCameraSelector(cameraSelector.value).build()
+    val preview = Preview.Builder().setMaxResolution(Size(screenWidth, screenWidth)).setCameraSelector(cameraSelector.value).build()
 
+    val imageCapture = remember {
+        ImageCapture.Builder()
+            .setTargetRotation(Surface.ROTATION_0)
+            .setFlashMode(if (isFlashing.value) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF)
+            .build()
+    }
 
+    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+    cameraProviderFuture.addListener({
+        val cameraProvider = cameraProviderFuture.get()
+        try {
+            cameraProvider.unbindAll()
+
+            cameraProvider.bindToLifecycle(lifecycleOwner,cameraSelector.value,preview, imageCapture)
+
+            preview.apply {
+                setSurfaceProvider(previewView.surfaceProvider)
+            }
+        }catch (exc: Exception){
+            Log.e("Loi", "Use case binding failed", exc)
+        }
+    }, ContextCompat.getMainExecutor(context))
 
     
     Column{
@@ -103,27 +140,9 @@ fun CameraComponent() {
             factory = { previewView },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(450.dp)
+                .height(screenWidth.dp)
                 .clip(shape = RoundedCornerShape(60.dp)),
-        ){
-
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
-                    try {
-                        cameraProvider.unbindAll()
-
-                        cameraProvider.bindToLifecycle(lifecycleOwner,cameraSelector.value,preview)
-
-                        preview.apply {
-                            setSurfaceProvider(previewView.surfaceProvider)
-                        }
-                    }catch (exc: Exception){
-                        Log.e("Loi", "Use case binding failed", exc)
-                    }
-                }, ContextCompat.getMainExecutor(context))
-
-        }
+        )
         Spacer(modifier = Modifier.height(50.dp))
 
         Row(
@@ -150,7 +169,41 @@ fun CameraComponent() {
 
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    val outputFile = File(context.cacheDir, "${System.currentTimeMillis()}.jpg")
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile).build()
+
+                    imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context),
+                        object : ImageCapture.OnImageSavedCallback {
+                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                // Lấy dữ liệu ảnh từ file
+                                val imgPath = outputFile.absolutePath
+                                Log.e("CameraX", "Image: $imgPath")
+                                val encodedPath = URLEncoder.encode(imgPath, StandardCharsets.UTF_8.toString())
+                                navController.navigate(route = "sending/$encodedPath")
+                            }
+
+                            override fun onError(exception: ImageCaptureException) {
+                                Log.e("CameraX", "Error capturing image: ${exception.message}", exception)
+                            }
+                        }
+                    )
+//                    imageCapture.takePicture(outputOptions1, ContextCompat.getMainExecutor(context),
+//                        object : ImageCapture.OnImageSavedCallback {
+//                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+//                                // Ảnh đã được lưu thành công
+//                                Log.e("CameraX", "Ảnh đã được lưu tại: ${outputFile1.absolutePath}")
+//
+//                                // Chuyển hướng tới màn hình tiếp theo với đường dẫn ảnh
+////                                navController.navigate("sending/${outputFile.absolutePath}")
+//                            }
+//
+//                            override fun onError(exception: ImageCaptureException) {
+//                                Log.e("CameraX", "Lỗi khi chụp ảnh: ${exception.message}", exception)
+//                            }
+//                        }
+//                    )
+                },
                 modifier = Modifier
                     .size(110.dp)
                     .border(5.dp, Amber, CircleShape),
@@ -159,7 +212,7 @@ fun CameraComponent() {
                     contentColor = Color.White
                 )
             ) {
-                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Turn on flash", modifier = Modifier.size(90.dp))
+                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Capture", modifier = Modifier.size(90.dp))
             }
 
             IconButton(

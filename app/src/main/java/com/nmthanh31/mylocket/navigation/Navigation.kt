@@ -14,7 +14,10 @@ import com.nmthanh31.mylocket.ui.screens.ChoosePasswordScreen
 import com.nmthanh31.mylocket.ui.screens.EnterPasswordScreen
 import com.nmthanh31.mylocket.ui.screens.HomeScreen
 import com.nmthanh31.mylocket.ui.screens.RegisterAndLoginScreen
+import com.nmthanh31.mylocket.ui.screens.SendingScreen
 import com.nmthanh31.mylocket.ui.screens.WelcomeScreen
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @SuppressLint("RestrictedApi")
 @Composable
@@ -76,5 +79,11 @@ fun MyLocketNavHost() {
         }
         composable("home") { HomeScreen(navController = navController, auth = auth) }
         composable("chat") { ChatScreen(navController = navController) }
+        composable("sending/{imgPath}"){navBackStackEntry ->
+            val encodedPath = navBackStackEntry.arguments?.getString("imgPath")
+            val imgPath = encodedPath?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
+            SendingScreen(navController= navController, imagePath = imgPath)
+//            SendingScreen()
+        }
     }
 }
