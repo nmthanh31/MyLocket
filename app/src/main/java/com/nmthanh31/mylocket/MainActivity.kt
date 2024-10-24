@@ -21,14 +21,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyLocketTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
-//                    WelcomeScreen(modifier = Modifier.fillMaxSize())
-//                    RegisterAndLoginScreen(modifier = Modifier.fillMaxSize().padding(paddingValues))
-//                    ChoosePasswordScreen(modifier = Modifier.fillMaxSize().padding(paddingValues))
-//                    HomeScreen(modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(paddingValues))
-//                    ProfileScreen()
-//                    ChatScreen()
                     MyLocketNavHost()
                 }
 

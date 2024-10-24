@@ -57,8 +57,7 @@ import kotlinx.coroutines.launch
 fun ProfileBottomSheet(
     auth: FirebaseAuth,
     navController: NavController,
-    onClosed: () -> Unit,
-    sheetState: SheetState
+    logOut: () -> Unit
 ) {
 
 
@@ -147,8 +146,7 @@ fun ProfileBottomSheet(
             onOpenBottomSheet={
                 showBottomSheetChangeEmail = !showBottomSheetChangeEmail
             },
-            onClosed = onClosed,
-            sheetState = sheetState
+            logOut = logOut
         )
 
         if (showBottomSheetChangeName) {
@@ -261,8 +259,7 @@ fun ButtonSetting(
     auth: FirebaseAuth,
     navController: NavController,
     onOpenBottomSheet: () -> Unit,
-    onClosed:()->Unit,
-    sheetState: SheetState
+    logOut: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -310,13 +307,8 @@ fun ButtonSetting(
             icon = R.drawable.ic_log_out,
             status = "",
             onAction = {
-            auth.signOut()
-//            navController.navigate("welcome")
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                        onClosed()
-                    }
-                }
+                logOut()
+
             },
             contentColor = MaterialTheme.colorScheme.secondary
         )

@@ -30,19 +30,29 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import com.nmthanh31.mylocket.data.UserViewModel
+import com.nmthanh31.mylocket.domain.User
 import com.nmthanh31.mylocket.ui.bottomsheets.FriendBottomSheet
 import com.nmthanh31.mylocket.ui.bottomsheets.ProfileBottomSheet
 import com.nmthanh31.mylocket.ui.components.CameraComponent
 import com.nmthanh31.mylocket.ui.components.ImageComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,38 +80,12 @@ fun HomeScreen(
         skipPartiallyExpanded = true
     )
 
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    //Firestore
-    val firebase = Firebase
-    val db = firebase.firestore
     val userAuthentication = auth.currentUser!!
-    val uid = userAuthentication.uid
-    val userDocRef = db.collection("users").document(uid)
-
-    userDocRef.get()
-        .addOnSuccessListener { document ->
-            if (!document.exists()) {
-                // Tài liệu với uid chưa tồn tại, có thể thêm người dùng mới
-                val newUser = hashMapOf(
-                    "id" to uid,
-                    "name" to userAuthentication.displayName,
-                    "email" to userAuthentication.email,
-                    "photo" to userAuthentication.photoUrl?.toString()
-                )
-                userDocRef.set(newUser)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "New user added", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(context, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Failed to check user: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-
+    val userViewModel: UserViewModel = viewModel()
+    val newUser = User(id = userAuthentication.uid, name = userAuthentication.displayName!!, email = userAuthentication.email!!, photo = userAuthentication.photoUrl.toString())
+    userViewModel.addUser(newUser)
 
     Box(
         modifier = Modifier
@@ -115,7 +99,6 @@ fun HomeScreen(
                 0 -> CameraComponent(navController = navController)
                 else -> ImageComponent()
             }
-
         }
 
 
@@ -201,10 +184,27 @@ fun HomeScreen(
                 ProfileBottomSheet(
                     auth,
                     navController,
-                    onClosed = {
-                        showBottomSheet = false
-                    },
-                    sheetState = sheetState)
+                    logOut = {
+//                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+//                            if (!sheetState.isVisible) {
+//                                showBottomSheet = false
+//
+//                            }
+//                        }
+
+                        scope.launch {
+                            userViewModel.removeUserListener()
+
+                            // Điều hướng đến màn hình welcome
+                            navController.navigate("welcome") {
+                                popUpTo("home") { inclusive = true }
+                            }
+
+                        }
+
+
+                    }
+                )
             }
         }
         if (showBottomSheetFriend) {
@@ -215,10 +215,9 @@ fun HomeScreen(
                 containerColor = MaterialTheme.colorScheme.onBackground
 
             ) {
-                FriendBottomSheet(auth, firebase)
+                FriendBottomSheet(auth)
             }
         }
     }
 }
-
 

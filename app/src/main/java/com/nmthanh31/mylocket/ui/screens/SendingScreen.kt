@@ -43,6 +43,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,21 +68,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nmthanh31.mylocket.R
+import com.nmthanh31.mylocket.data.FriendViewModel
+import com.nmthanh31.mylocket.data.FriendViewModelFactory
+import com.nmthanh31.mylocket.data.PostViewModel
+import com.nmthanh31.mylocket.data.PostViewModelFactory
 import com.nmthanh31.mylocket.domain.Friend
 import com.nmthanh31.mylocket.domain.FriendStatus
+import com.nmthanh31.mylocket.domain.Post
 import com.nmthanh31.mylocket.ui.theme.Amber
 import com.nmthanh31.mylocket.ui.theme.Background
 import com.nmthanh31.mylocket.ui.theme.Grey
 import java.io.File
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SendingScreen(
     navController: NavController,
-    imagePath: String?
+    imagePath: String?,
+    auth: FirebaseAuth
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
@@ -94,10 +103,25 @@ fun SendingScreen(
     val placeholderWidth = placeholderText.length * 11
 
     var chooseSending by remember {
+        mutableStateOf(listOf<String>())
+    }
+
+    var status by remember {
         mutableStateOf("all")
     }
+
     val context = LocalContext.current
 
+    val currentUser = auth.currentUser!!
+
+    val friendViewModel: FriendViewModel = viewModel(
+        factory = FriendViewModelFactory(currentUser.uid)
+    )
+    val friendList by friendViewModel.friends.collectAsState(emptyList())
+
+    val postViewModel: PostViewModel = viewModel(
+        factory = PostViewModelFactory(currentUser.uid)
+    )
 
 
     val bitmap = BitmapFactory.decodeFile(imagePath)
@@ -182,7 +206,6 @@ fun SendingScreen(
                     },
                     modifier = Modifier
                         .onGloballyPositioned { coordinates ->
-                            // Cập nhật chiều rộng của TextField
                             textFieldWidth = coordinates.size
                         }
                         .width(if (message == "") placeholderWidth.dp else with(LocalDensity.current) { textFieldWidth.width.toDp() })
@@ -211,7 +234,9 @@ fun SendingScreen(
                 }
 
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        postViewModel.addPost(content = message, photo = "", toWho = chooseSending)
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         contentColor = Color.White,
                         containerColor = Grey
@@ -237,7 +262,9 @@ fun SendingScreen(
             }
 
             LazyRow(
-                modifier = Modifier.fillMaxWidth().padding(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(50.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 item {
@@ -245,7 +272,10 @@ fun SendingScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
                         IconButton(
-                            onClick = { chooseSending="all" },
+                            onClick = {
+                                chooseSending = friendList.map { item -> item.id }
+                                status = "all"
+                            },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = Grey,
                                 contentColor = Color.Gray
@@ -253,7 +283,7 @@ fun SendingScreen(
                             modifier = Modifier
                                 .border(
                                     width = 2.dp,
-                                    color = if (chooseSending == "all") Amber else Color.Gray,
+                                    color = if (status == "all") Amber else Color.Gray,
                                     shape = CircleShape
                                 )
                         ) {
@@ -264,44 +294,50 @@ fun SendingScreen(
                             modifier = Modifier.padding(top = 5.dp),
                             style = TextStyle(
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (chooseSending == "all") Amber else Grey
+                                color = if (status == "all") Amber else Grey
                             )
                         )
                     }
 
 
                 }
-//                items(listFriend) {
-//                    item: Friend ->
-//                    Column(
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        IconButton(onClick = { chooseSending = item.id }) {
-//                            Image(
-//                                painter = painterResource(id = R.drawable.img),
-//                                contentDescription = "",
-//                                modifier = Modifier
-//                                    .border(
-//                                        width = 2.dp,
-//                                        color = if (chooseSending == item.id) Amber else Grey,
-//                                        shape = CircleShape
-//                                    )
-//                            )
-//                        }
-//
-//                        Text(
-//                            text = item.name,
-//                            modifier = Modifier.padding(top = 5.dp),
-//                            style = TextStyle(
-//                                fontWeight = FontWeight.SemiBold,
-//                                color = if (chooseSending == item.id) Amber else Grey
-//                            ),
-//                            overflow = TextOverflow.Ellipsis,
-//                            maxLines = 1,
-//                        )
-//                    }
-//
-//                }
+                items(friendList) {
+                    item: Friend ->
+                    if (item.status == FriendStatus.FRIENDS.toString()){
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    status = item.id
+                                    chooseSending = listOf(currentUser.uid, item.id)
+                                }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.img),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .border(
+                                            width = 2.dp,
+                                            color = if (status == item.id) Amber else Grey,
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+
+                            Text(
+                                text = item.name,
+                                modifier = Modifier.padding(top = 5.dp),
+                                style = TextStyle(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (status == item.id) Amber else Grey
+                                ),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
 
             }
         }
