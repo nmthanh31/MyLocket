@@ -1,5 +1,6 @@
 package com.nmthanh31.mylocket.data
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -82,7 +83,7 @@ class PostViewModel(private val uid: String): ViewModel() {
                     .document(postID)
                     .set(newPost).await()
             }catch (e: Exception){
-                Log.e("Add Post", "Error adding post")
+                Log.e("Add Post", e.toString())
             }
         }
     }

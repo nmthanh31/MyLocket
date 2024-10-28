@@ -7,9 +7,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +45,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +73,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.storage
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.data.FriendViewModel
 import com.nmthanh31.mylocket.data.FriendViewModelFactory
@@ -92,9 +99,11 @@ fun SendingScreen(
     imagePath: String?,
     auth: FirebaseAuth
 ) {
+    //Lấy chiều rộng màn hình
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
 
+    //Content để đăng post
     var message by remember {
         mutableStateOf("")
     }
@@ -102,9 +111,7 @@ fun SendingScreen(
     val placeholderText = "Thêm một tin nhắn"
     val placeholderWidth = placeholderText.length * 11
 
-    var chooseSending by remember {
-        mutableStateOf(listOf<String>())
-    }
+
 
     var status by remember {
         mutableStateOf("all")
@@ -123,6 +130,15 @@ fun SendingScreen(
         factory = PostViewModelFactory(currentUser.uid)
     )
 
+    var chooseSending by remember {
+        mutableStateOf(listOf<String>())
+    }
+
+    LaunchedEffect(friendList) {
+        if (friendList.isNotEmpty()) {
+            chooseSending = friendList.map { item -> item.id } + currentUser.uid
+        }
+    }
 
     val bitmap = BitmapFactory.decodeFile(imagePath)
     // Lấy độ xoay
@@ -235,7 +251,47 @@ fun SendingScreen(
 
                 IconButton(
                     onClick = {
-                        postViewModel.addPost(content = message, photo = "", toWho = chooseSending)
+
+                        val file = File(imagePath)  // Tạo đối tượng File từ đường dẫn
+                        if (file.exists()) {
+                            // Bước 1: Lấy tham chiếu đến Firebase Storage
+                            val storage = FirebaseStorage.getInstance()
+                            val storageRef: StorageReference = storage.reference
+
+                            // Bước 2: Tạo một đường dẫn tệp trên Firebase Storage
+                            val imageRef: StorageReference = storageRef.child("images/${System.currentTimeMillis()}.jpg") // Tạo tên file duy nhất bằng timestamp
+
+                            // Bước 3: Tải tệp lên Firebase Storage
+                            val uri = Uri.fromFile(file)  // Chuyển file thành URI
+                            val uploadTask = imageRef.putFile(uri)
+
+                            // Xử lý kết quả tải lên
+                            uploadTask.addOnSuccessListener { taskSnapshot ->
+                                // Lấy URL tải về của tệp
+                                imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                                    // URL của hình ảnh đã tải lên
+                                    Log.d("Firebase", "Image URL: $downloadUri")
+
+                                    // Gọi ViewModel để thêm post mới vào Firestore
+                                    postViewModel.addPost(
+                                        content = message,
+                                        photo = downloadUri.toString(),  // Lưu URL ảnh vào Firestore
+                                        toWho = chooseSending
+                                    )
+                                    navController.popBackStack()
+
+                                }.addOnFailureListener { e ->
+                                    Log.w("Firebase", "Failed to get download URL", e)
+                                }
+                            }.addOnFailureListener { e ->
+                                Log.w("Firebase", "Error uploading image", e)
+                            }
+                        } else {
+                            Log.w("Firebase", "File does not exist at the specified path")
+                        }
+
+
+
                     },
                     colors = IconButtonDefaults.iconButtonColors(
                         contentColor = Color.White,
@@ -273,7 +329,7 @@ fun SendingScreen(
                     ){
                         IconButton(
                             onClick = {
-                                chooseSending = friendList.map { item -> item.id }
+                                chooseSending = friendList.map { item -> item.id } + currentUser.uid
                                 status = "all"
                             },
                             colors = IconButtonDefaults.iconButtonColors(
