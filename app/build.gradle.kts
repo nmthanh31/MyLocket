@@ -82,10 +82,16 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-firestore")
 
 
     //navigation
     val nav_version = "2.8.2"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    //permission
+    val permissions_version = "0.36.0"
+    implementation ("com.google.accompanist:accompanist-permissions:$permissions_version")
 }

@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,27 +42,29 @@ fun ImageComponent(
     modifier: Modifier = Modifier,
     uriImage: Uri? = null
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Spacer(modifier = Modifier.height(150.dp))
+
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp)
+                .height(screenWidth.dp)
                 .clip(shape = RoundedCornerShape(60.dp)),
-            contentAlignment = Alignment.Center
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.img),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .padding(10.dp)
-                    .clip(shape = RoundedCornerShape(60.dp))
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
 
             )
 

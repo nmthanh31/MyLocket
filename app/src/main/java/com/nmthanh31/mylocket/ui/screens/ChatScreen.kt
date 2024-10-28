@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -111,7 +112,9 @@ fun ChatScreen(
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 30.dp, end = 30.dp).align(Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .padding(start = 30.dp, end = 30.dp)
+                        .align(Alignment.CenterHorizontally),
                     textAlign = TextAlign.Center
                 )
 

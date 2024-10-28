@@ -27,14 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.nmthanh31.mylocket.R
 import com.nmthanh31.mylocket.ui.theme.*
 
 @Composable
 fun WelcomeScreen(
     onNavigateToRegister: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -61,7 +62,7 @@ import com.nmthanh31.mylocket.ui.theme.Charcoal
 fun EnterPasswordScreen(
     auth: FirebaseAuth,
     navController: NavController,
-    email: String?
+    email: String?,
 ) {
 
     var password by remember {
@@ -152,23 +153,25 @@ fun EnterPasswordScreen(
 
             Button(
                 onClick = {
-                    if (fixedEmail != null) {
-                        auth.sendPasswordResetEmail(email)
-                            .addOnCompleteListener{
-                                    task ->
-                                run {
-                                    if (task.isComplete) {
-                                        Toast.makeText(
-                                            context,
-                                          "Đã gửi đường dẫn đổi mật khẩu vào email",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        Toast.makeText(context, "Không thể gửi đến email", Toast.LENGTH_SHORT)
+
+                        if (fixedEmail != null) {
+                            auth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener{
+                                        task ->
+                                    run {
+                                        if (task.isComplete) {
+                                            Toast.makeText(
+                                                context,
+                                                "Đã gửi đường dẫn đổi mật khẩu vào email",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } else {
+                                            Toast.makeText(context, "Không thể gửi đến email", Toast.LENGTH_SHORT)
+                                        }
                                     }
                                 }
-                            }
-                    }
+                        }
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Charcoal,
@@ -186,7 +189,9 @@ fun EnterPasswordScreen(
         Button(
             onClick = {
                 if (fixedEmail != null) {
+
                     SignIn(auth, navController, password, fixedEmail, context )
+
                 }
             },
             modifier = Modifier
