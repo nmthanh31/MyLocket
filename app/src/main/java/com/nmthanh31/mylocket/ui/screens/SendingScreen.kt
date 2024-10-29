@@ -252,7 +252,7 @@ fun SendingScreen(
                 IconButton(
                     onClick = {
 
-                        val file = File(imagePath)  // Tạo đối tượng File từ đường dẫn
+                        val file = File(imagePath!!)  // Tạo đối tượng File từ đường dẫn
                         if (file.exists()) {
                             // Bước 1: Lấy tham chiếu đến Firebase Storage
                             val storage = FirebaseStorage.getInstance()

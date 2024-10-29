@@ -1,9 +1,12 @@
 package com.nmthanh31.mylocket.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.nfc.Tag
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -43,7 +46,13 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import com.nmthanh31.mylocket.data.FriendViewModel
+import com.nmthanh31.mylocket.data.FriendViewModelFactory
+import com.nmthanh31.mylocket.data.PostViewModel
+import com.nmthanh31.mylocket.data.PostViewModelFactory
 import com.nmthanh31.mylocket.data.UserViewModel
+import com.nmthanh31.mylocket.domain.Friend
+import com.nmthanh31.mylocket.domain.FriendStatus
 import com.nmthanh31.mylocket.domain.User
 import com.nmthanh31.mylocket.ui.bottomsheets.FriendBottomSheet
 import com.nmthanh31.mylocket.ui.bottomsheets.ProfileBottomSheet
@@ -60,9 +69,6 @@ fun HomeScreen(
     navController: NavController,
     auth: FirebaseAuth
 ) {
-    //Pager
-    val pagerState =  rememberPagerState (initialPage = 0, pageCount = {10})
-
     //bottom sheet
     var showBottomSheet by remember {
         mutableStateOf(false)
@@ -87,6 +93,21 @@ fun HomeScreen(
     val newUser = User(id = userAuthentication.uid, name = userAuthentication.displayName!!, email = userAuthentication.email!!, photo = userAuthentication.photoUrl.toString())
     userViewModel.addUser(newUser)
 
+    val friendViewModel: FriendViewModel = viewModel(
+        factory = FriendViewModelFactory(userAuthentication.uid)
+    )
+    val friendList by friendViewModel.friends.collectAsState(emptyList())
+
+    val postViewModel: PostViewModel = viewModel(
+        factory = PostViewModelFactory(userAuthentication.uid)
+    )
+    val postList by postViewModel.posts.collectAsState(emptyList())
+
+    //Pager
+    val pagerState =  rememberPagerState (initialPage = 0, pageCount = {if (postList.isNotEmpty()) postList.size+1 else 1})
+    val scrollScope = rememberCoroutineScope()
+
+
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -97,7 +118,10 @@ fun HomeScreen(
         ) {page ->
             when (page){
                 0 -> CameraComponent(navController = navController)
-                else -> ImageComponent()
+                else -> ImageComponent(post = postList[page - 1], toCamera = {scrollScope.launch { pagerState.animateScrollToPage(
+                    page = 0,
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                ) }})
             }
         }
 
@@ -149,7 +173,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.width(5.dp))
 
                 Text(
-                    text = if(pagerState.currentPage == 0) "1 Bạn bè" else "Tất cả bạn bè",
+                    text = if(pagerState.currentPage == 0) "${friendList.filter { friend -> friend.status == FriendStatus.FRIENDS.toString() }.size} Bạn bè" else "Tất cả bạn bè",
                     style = MaterialTheme.typography.bodyLarge,
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.SemiBold

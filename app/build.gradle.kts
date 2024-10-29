@@ -94,4 +94,8 @@ dependencies {
     //permission
     val permissions_version = "0.36.0"
     implementation ("com.google.accompanist:accompanist-permissions:$permissions_version")
+
+    //Coil
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0-rc01")
 }

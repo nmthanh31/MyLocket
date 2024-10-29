@@ -188,21 +188,7 @@ fun CameraComponent(
                             }
                         }
                     )
-//                    imageCapture.takePicture(outputOptions1, ContextCompat.getMainExecutor(context),
-//                        object : ImageCapture.OnImageSavedCallback {
-//                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-//                                // Ảnh đã được lưu thành công
-//                                Log.e("CameraX", "Ảnh đã được lưu tại: ${outputFile1.absolutePath}")
-//
-//                                // Chuyển hướng tới màn hình tiếp theo với đường dẫn ảnh
-////                                navController.navigate("sending/${outputFile.absolutePath}")
-//                            }
-//
-//                            override fun onError(exception: ImageCaptureException) {
-//                                Log.e("CameraX", "Lỗi khi chụp ảnh: ${exception.message}", exception)
-//                            }
-//                        }
-//                    )
+
                 },
                 modifier = Modifier
                     .size(110.dp)

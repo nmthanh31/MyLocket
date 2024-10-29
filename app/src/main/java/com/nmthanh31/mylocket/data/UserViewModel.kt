@@ -17,10 +17,15 @@ class UserViewModel : ViewModel(){
     private val db = Firebase.firestore
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
+    private var _user = MutableStateFlow<User?>(null)
+
     val users:StateFlow<List<User>>
         get() {
             return _users
         }
+
+    val user:StateFlow<User?>
+        get() = _user
 
     private var listenerRegistration: ListenerRegistration? = null
 
@@ -78,6 +83,30 @@ class UserViewModel : ViewModel(){
         }
     }
 
+    fun getUserById(uid: String) {
+        viewModelScope.launch {  // Khởi động một coroutine
+            try {
+                val userDoc = db.collection("users")
+                    .whereEqualTo("id", uid)
+                    .get()
+                    .await()
+
+                if (!userDoc.isEmpty) {
+                    val userSnapshot = userDoc.documents[0]
+                    val userId = userSnapshot.getString("id")
+                    val userName = userSnapshot.getString("name")
+                    val userEmail = userSnapshot.getString("email")
+                    val userPhoto = userSnapshot.getString("photo")
+                    val user = User(id = userId!!, name = userName!!, email = userEmail!!, photo = userPhoto)
+                    _user.value = user
+                } else {
+                    Log.d("Get User", "User with id $uid doesn't exist")
+                }
+            } catch (e: Exception) {
+                Log.e("Get User", "Error retrieving user", e)
+            }
+        }
+    }
 
     fun removeUserListener(){
         listenerRegistration?.remove()

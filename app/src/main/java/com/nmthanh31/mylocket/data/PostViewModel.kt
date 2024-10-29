@@ -51,14 +51,26 @@ class PostViewModel(private val uid: String): ViewModel() {
                     val posts = mutableListOf<Post>()
                     for (document in snapshot){
                         val postId = document.getString("id")
+                        val userSentId = document.getString("uid")
                         val postContent = document.getString("content")
                         val postTime = document.getTimestamp("time")
                         val postPhoto = document.getString("photo")
                         val postToWho = document.get("toWho") as List<String>
-                        val post = Post(id = postId!!, content = postContent!!, time = postTime!!, photo = postPhoto!!, toWho = postToWho)
-                        posts.add(post)
+                        if (postId != null && postContent != null && postTime != null && postPhoto != null && userSentId !=null) {
+                            val post = Post(
+                                id = postId,
+                                uid = userSentId,
+                                content = postContent,
+                                time = postTime,
+                                photo = postPhoto,
+                                toWho = postToWho
+                            )
+                            posts.add(post)
+                        } else {
+                            Log.w("Load Posts", "Skipped a post due to missing fields.")
+                        }
                     }
-                    _posts.value = posts
+                    _posts.value = posts.sortedByDescending { item->item.time }
                 }else{
                     Log.d("Load Posts", "No posts found.")
                     _posts.value = emptyList()
@@ -72,6 +84,7 @@ class PostViewModel(private val uid: String): ViewModel() {
                 val postID = db.collection("users").document(uid).collection("posts").document().id
                 val newPost = hashMapOf(
                     "id" to postID,
+                    "uid" to uid,
                     "content" to content,
                     "time" to FieldValue.serverTimestamp(),
                     "photo" to photo,
