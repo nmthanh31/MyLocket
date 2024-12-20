@@ -64,7 +64,6 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun ImageComponent(
     post: Post,
-    toCamera:() -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
@@ -76,11 +75,9 @@ fun ImageComponent(
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Spacer(modifier = Modifier.height(150.dp))
 
         Box(
             modifier = Modifier
@@ -106,8 +103,12 @@ fun ImageComponent(
                     .background(Color(0x80000000), shape = RoundedCornerShape(10.dp))
                     .padding(8.dp),
             )
+
+           
         }
 
+        Spacer(modifier = Modifier.height(30.dp))
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -133,54 +134,6 @@ fun ImageComponent(
             )
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(shape = CircleShape),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(painter = painterResource(id = R.drawable.grid), contentDescription = "Turn on flash",  modifier = Modifier.size(30.dp))
-            }
-
-
-            IconButton(
-                onClick = toCamera,
-                modifier = Modifier
-                    .size(50.dp)
-                    .border(3.dp, Amber, CircleShape),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(painter = painterResource(id = R.drawable.capture), contentDescription = "Turn on flash", modifier = Modifier.size(35.dp))
-            }
-
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(shape = CircleShape),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(painter = painterResource(id = R.drawable.option), contentDescription = "rotate camera", modifier = Modifier.size(40.dp))
-            }
-        }
 
     }
 }
